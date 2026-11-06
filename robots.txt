@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /login
+
+Sitemap: https://imochat.site/sitemap.xml
+Host: imochat.site
