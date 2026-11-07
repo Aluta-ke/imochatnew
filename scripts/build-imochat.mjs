@@ -10,6 +10,7 @@ const ABOUT = "ImoChat is a digital community that brings people together throug
 const SITE = "https://imochat.site";
 const REG = "https://mulaearn.com/register.php?ref=MartinKe";
 const WA = "https://whatsapp.com/channel/0029Vb9qQESFnSz6h9Jhz20";
+const CONTACT = "https://wa.me/254101049310?text=" + encodeURIComponent("Hello, Am interested");
 const EMAIL = "helmarmartin98@gmail.com";
 
 function esc(value) {
@@ -69,7 +70,7 @@ function shell({ title, description, pathname, body, noindex = false }) {
   <nav class="nav" id="site-nav" data-nav>
     <p class="menu-label">Activities</p>
     ${activities.map(([title, , href]) => `<a href="${href}"${current(pathname, href)}>${esc(title)}</a>`).join("")}
-    <a class="btn btn-wa menu-contact" href="${WA}" target="_blank" rel="noopener noreferrer">Contact Us</a>
+    <a class="btn btn-wa menu-contact" href="${CONTACT}" target="_blank" rel="noopener noreferrer">Contact Us</a>
   </nav>
 </header>
 <main id="main">${body}</main>
@@ -96,7 +97,7 @@ function shell({ title, description, pathname, body, noindex = false }) {
     <div>
       <strong>Support</strong>
       <div class="link-list">
-        <a href="${WA}" target="_blank" rel="noopener noreferrer">Contact Us</a>
+        <a href="${CONTACT}" target="_blank" rel="noopener noreferrer">Contact Us</a>
         <a href="${WA}" target="_blank" rel="noopener noreferrer">Join WhatsApp Channel</a>
         <a href="mailto:${EMAIL}">Email Support</a>
       </div>
@@ -249,7 +250,7 @@ pages.push({
       <div class="hero-actions">
         <a class="btn btn-gold btn-pop" href="${REG}" target="_blank" rel="noopener noreferrer">Start chatting</a>
         <a class="btn btn-live" href="/chat/">How chat works</a>
-        <a class="btn btn-wa" href="${WA}" target="_blank" rel="noopener noreferrer">Contact Us</a>
+        <a class="btn btn-wa" href="${CONTACT}" target="_blank" rel="noopener noreferrer">Contact Us</a>
       </div>
     </div>
     <div class="lgc-stack" data-live-chat>
@@ -310,9 +311,9 @@ pages.push({
     <a class="btn btn-gold earn-btn" href="${REG}" target="_blank" rel="noopener noreferrer">Create your account</a>
     <article class="panel">
       <h2>Community</h2>
-      <p class="muted">Contact buttons open the ImoChat WhatsApp Channel. Email is separate.</p>
+      <p class="muted">Contact Us opens a WhatsApp chat. Email is separate.</p>
       <div class="hero-actions">
-        <a class="btn" href="${WA}" target="_blank" rel="noopener noreferrer">Contact Us</a>
+        <a class="btn" href="${CONTACT}" target="_blank" rel="noopener noreferrer">Contact Us</a>
         <a class="btn btn-ghost" href="${WA}" target="_blank" rel="noopener noreferrer">Join WhatsApp Channel</a>
         <a class="btn btn-ghost" href="mailto:${EMAIL}">Email Support</a>
       </div>
@@ -839,18 +840,18 @@ pages.push({
   <section class="wrap section prose">
     <p>${ABOUT}</p>
     <p>Chat with foreigners is the first activity. Conversation opens from a registered account. Lessons, articles, music, surveys, and sports notes live on this website.</p>
-    <p>Support is available through the WhatsApp Channel and by email at ${EMAIL}.</p>
+    <p>Support is available on WhatsApp and by email at ${EMAIL}.</p>
   </section>`
 });
 
 pages.push({
   pathname: "/contact/",
   title: "Contact ImoChat",
-  description: `Contact ImoChat through the WhatsApp Channel or by email at ${EMAIL}.`,
-  body: `${pageHero("Support", "Contact", "Use the channel for community updates and the email address for support. ImoChat does not publish a personal chat number.")}
+  description: `Contact ImoChat on WhatsApp or by email at ${EMAIL}.`,
+  body: `${pageHero("Support", "Contact", "Contact Us opens a WhatsApp chat. The channel link is for community updates, and email is for support.")}
   <section class="wrap section grid-3">
-    <article class="panel"><h3>Contact Us</h3><p class="muted">Opens the official WhatsApp Channel.</p><p style="margin-top:10px"><a class="btn" href="${WA}" target="_blank" rel="noopener noreferrer">Contact Us</a></p></article>
-    <article class="panel"><h3>WhatsApp Channel</h3><p class="muted">The same channel link, labeled for joining.</p><p style="margin-top:10px"><a class="btn" href="${WA}" target="_blank" rel="noopener noreferrer">Join WhatsApp Channel</a></p></article>
+    <article class="panel"><h3>Contact Us</h3><p class="muted">Opens WhatsApp with a short hello.</p><p style="margin-top:10px"><a class="btn" href="${CONTACT}" target="_blank" rel="noopener noreferrer">Contact Us</a></p></article>
+    <article class="panel"><h3>WhatsApp Channel</h3><p class="muted">Join the channel for community updates.</p><p style="margin-top:10px"><a class="btn" href="${WA}" target="_blank" rel="noopener noreferrer">Join WhatsApp Channel</a></p></article>
     <article class="panel"><h3>Email</h3><p class="muted">${EMAIL}</p><p style="margin-top:10px"><a class="btn btn-ghost" href="mailto:${EMAIL}">Email Support</a></p></article>
   </section>`
 });
