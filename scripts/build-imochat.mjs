@@ -8,7 +8,7 @@ const BRAND = "ImoChat";
 const TAGLINE = "Connect. Learn. Earn.";
 const ABOUT = "ImoChat is a digital community that brings people together through international communication, language exchange, learning and interactive online activities. Discover new connections, explore digital experiences and access useful learning resources in one convenient place.";
 const SITE = "https://imochat.site";
-const REG = "https://mulaearn.com/register.php?ref=MartinKe";
+const REG = "https://lipahub.com/register.php?ref=MartinKe";
 const WA = "https://whatsapp.com/channel/0029Vb9qQESFnSz6h9Jhz20";
 const CONTACT = "https://wa.me/254101049310?text=" + encodeURIComponent("Hello, Am interested");
 const EMAIL = "helmarmartin98@gmail.com";

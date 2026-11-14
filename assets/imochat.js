@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var REG = "https://mulaearn.com/register.php?ref=MartinKe";
+  var REG = "https://lipahub.com/register.php?ref=MartinKe";
   var KEYS = {
     profile: "imochat.profile",
     articles: "imochat.articles",
