@@ -10,7 +10,7 @@ const ABOUT = "ImoChat is a digital community that brings people together throug
 const SITE = "https://imochat.site";
 const REG = "https://lipahub.com/register.php?ref=MartinKe";
 const WA = "https://whatsapp.com/channel/0029Vb9qQESFnSz6h9Jhz20";
-const CONTACT = "https://wa.me/254101049310?text=" + encodeURIComponent("Hello, Am interested");
+const CONTACT = "https://wa.me/254119098794?text=" + encodeURIComponent("Hello, Am interested");
 const EMAIL = "helmarmartin98@gmail.com";
 
 function esc(value) {
