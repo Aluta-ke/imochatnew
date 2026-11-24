@@ -15,7 +15,8 @@ const types = {
   ".ico": "image/x-icon",
   ".xml": "application/xml",
   ".txt": "text/plain; charset=utf-8",
-  ".webmanifest": "application/manifest+json"
+  ".webmanifest": "application/manifest+json",
+  ".json": "application/json; charset=utf-8"
 };
 
 const server = http.createServer((req, res) => {

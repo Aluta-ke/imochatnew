@@ -87,6 +87,7 @@ function shell({ title, description, pathname, body, noindex = false }) {
       <div class="link-list">
         <a href="/chat/">Chat with foreigners</a>
         <a href="/activities/">Activities</a>
+        <a href="/dashboard/">Account</a>
         <a href="/bonus/">Welcome bonus</a>
         <a href="/referrals/">Referral link</a>
         <a href="/about/">About</a>
@@ -105,13 +106,7 @@ function shell({ title, description, pathname, body, noindex = false }) {
   </div>
   <div class="wrap fine" style="margin-top:18px">© 2026 ${BRAND} · <a href="${SITE}/">imochat.site</a></div>
 </footer>
-<nav class="bottom-nav" aria-label="Primary">
-  <a href="/"${current(pathname, "/")}>Home</a>
-  <a href="/chat/"${current(pathname, "/chat/")}>Chat</a>
-  <a href="/activities/"${current(pathname, "/activities/")}>Activities</a>
-  <a href="/ai-lessons/"${current(pathname, "/ai-lessons/")}>Learn</a>
-  <a href="/dashboard/"${current(pathname, "/dashboard/")}>Account</a>
-</nav>
+<script src="/assets/live-activity-core.js" defer></script>
 <script src="/assets/imochat.js" defer></script>
 <script src="/pwa-install.js" defer></script>
 </body>

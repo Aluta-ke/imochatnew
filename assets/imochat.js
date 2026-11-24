@@ -548,6 +548,7 @@
   }
 
   markLively();
+  initLiveActivity();
   initNav();
   initCopy();
   initPreviewForms();
@@ -845,6 +846,81 @@
       countIndex = (countIndex + 1) % counts.length;
       tick(true);
     }, 2000);
+  }
+
+  function initLiveActivity() {
+    if (!window.ImoChatLive || !document.body) return;
+    var box = document.createElement("div");
+    box.className = "live-activity";
+    box.hidden = true;
+    box.setAttribute("data-live-activity", "");
+    box.setAttribute("role", "status");
+    box.setAttribute("aria-live", "polite");
+    box.setAttribute("aria-atomic", "true");
+    var flag = document.createElement("img");
+    flag.className = "live-activity-flag";
+    flag.alt = "";
+    flag.width = 20;
+    flag.height = 14;
+    flag.hidden = true;
+    var label = document.createElement("span");
+    label.className = "live-activity-label";
+    var text = document.createElement("span");
+    text.className = "live-activity-text";
+    box.appendChild(flag);
+    box.appendChild(label);
+    box.appendChild(text);
+    document.body.appendChild(box);
+
+    var queue = [];
+    var lastId = "";
+    var lastFlag = "";
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function nextNotice() {
+      if (!queue.length) {
+        queue = window.ImoChatLive.buildQueue(profile().region, Math.random);
+        if (queue.length > 1 && (queue[0].id === lastId || queue[0].flag === lastFlag)) queue.push(queue.shift());
+      }
+      var item = queue.shift();
+      lastId = item.id;
+      lastFlag = item.flag;
+      return item;
+    }
+
+    function paint(item) {
+      item = item || nextNotice();
+      label.textContent = item.label;
+      text.textContent = item.text;
+      if (item.flag) {
+        var src = "/assets/flags/" + item.flag + ".svg";
+        if (flag.getAttribute("src") !== src) flag.src = src;
+        flag.hidden = false;
+      } else {
+        flag.hidden = true;
+        flag.removeAttribute("src");
+      }
+      box.hidden = false;
+      box.classList.remove("is-out");
+      if (!reduce) {
+        box.classList.remove("is-in");
+        void box.offsetWidth;
+        box.classList.add("is-in");
+      }
+    }
+
+    function play() {
+      if (!reduce && !box.hidden) {
+        box.classList.remove("is-in");
+        box.classList.add("is-out");
+        window.setTimeout(paint, 280);
+      } else {
+        paint();
+      }
+    }
+
+    paint();
+    window.setInterval(play, 3000);
   }
 
 })();
