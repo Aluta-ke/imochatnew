@@ -1123,6 +1123,7 @@ body.pc-open { overflow: hidden; }
   font-size: 0.82rem;
   font-weight: 650;
 }
+.pc-meta .lgc-online { color: #3dbe7a; }
 .pc-count {
   grid-column: 1 / -1;
   justify-self: start;

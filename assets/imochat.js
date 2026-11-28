@@ -928,7 +928,7 @@
     var trigger = document.querySelector("[data-preview-chat]");
     if (!trigger) return;
 
-    var STORE = "imochat.previewChat";
+    var STORE = "imochat.liveChat";
     var FREE = 3;
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var partners = [
@@ -1022,7 +1022,7 @@
     sheet.setAttribute("role", "dialog");
     sheet.setAttribute("aria-modal", "true");
     sheet.setAttribute("aria-labelledby", "pc-title");
-    sheet.innerHTML = '<header class="pc-head"><button class="pc-close" type="button">Close</button><div class="pc-who"><div class="pc-avatar-slot"></div><div><h2 id="pc-title"></h2><p class="pc-meta"></p></div></div><p class="pc-count" aria-live="polite"></p></header><p class="pc-note">Interactive preview. This partner is a sample character, not someone who is online.</p><div class="pc-log" role="log" aria-live="polite"></div><form class="pc-form"><label class="pc-sr" for="pc-input">Message</label><input id="pc-input" maxlength="400" autocomplete="off" placeholder="Type a message"><button class="pc-send" type="submit">Send</button></form>';
+    sheet.innerHTML = '<header class="pc-head"><button class="pc-close" type="button">Close</button><div class="pc-who"><div class="pc-avatar-slot"></div><div><h2 id="pc-title"></h2><p class="pc-meta"></p></div></div><p class="pc-count" aria-live="polite"></p></header><div class="pc-log" role="log" aria-live="polite"></div><form class="pc-form"><label class="pc-sr" for="pc-input">Message</label><input id="pc-input" maxlength="400" autocomplete="off" placeholder="Type a message"><button class="pc-send" type="submit">Send</button></form>';
     overlay.appendChild(sheet);
 
     var gate = document.createElement("div");
@@ -1113,10 +1113,10 @@
       var place = document.createElement("span");
       place.textContent = partner.countryName;
       metaEl.appendChild(place);
-      var pill = document.createElement("span");
-      pill.className = "lgc-demo-pill";
-      pill.textContent = "PREVIEW";
-      metaEl.appendChild(pill);
+      var online = document.createElement("span");
+      online.className = "lgc-online";
+      online.textContent = "Online";
+      metaEl.appendChild(online);
       avatarSlot.innerHTML = "";
       var box = document.createElement("div");
       box.className = "lgc-avatar lgc-avatar-sm";
@@ -1134,6 +1134,10 @@
       } else {
         box.appendChild(letterNode(partner));
       }
+      var presence = document.createElement("span");
+      presence.className = "lgc-presence";
+      presence.setAttribute("aria-hidden", "true");
+      box.appendChild(presence);
       avatarSlot.appendChild(box);
       countEl.textContent = counterText(session.sent);
     }
@@ -1201,32 +1205,19 @@
       return match[1].replace(/[?.!"']+$/g, "").replace(/^(a |the |please )/, "").trim();
     }
 
-    function teach(table, say, langName, salt) {
-      var hit = findPhrase(table, say);
-      if (!hit) {
-        return "I want to keep this accurate, so I will not guess a " + langName + " line for \"" + say + ".\" Ask me for hello, good morning, thank you, or how are you.";
-      }
-      var line = spoken(hit.phrase);
-      return pick([
-        "You say \"" + line + "\"",
-        "In " + langName + " you say \"" + line + "\" " + hit.note,
-        "\"" + line + "\" " + hit.note
-      ], salt + hit.phrase);
-    }
-
     function opening(data, partner) {
       if (data.topic === "swahili") {
         return pick([
-          "Hello! I can help you practise Swahili. What would you like to say?",
-          "Habari! I am " + partner.name + " from " + placeName(partner) + ". Ask me for a Swahili phrase.",
-          "Hi. Want to learn a useful Swahili greeting?"
+          "Hello! Can you teach me Swahili?",
+          "Hi, I am " + partner.name + " from " + placeName(partner) + ". I would love to learn some Swahili.",
+          "Habari! I am trying to learn Swahili. Can you help me?"
         ], partner.id + "sw");
       }
       if (data.topic === "luganda") {
         return pick([
-          "Hi! I can help you learn some Luganda. What shall we try first?",
-          "Yes, I can teach you Luganda. Ask me how to say a greeting.",
-          "Hello, I am " + partner.name + ". A simple Luganda hello is \"Oli otya?\""
+          "Hi! Can you teach me Luganda?",
+          "Hello, I am " + partner.name + " from " + placeName(partner) + ". I want to learn a little Luganda.",
+          "Can you teach me how to say hello in Luganda?"
         ], partner.id + "lg");
       }
       return pick([
@@ -1234,6 +1225,83 @@
         "Hi, I am " + partner.name + " from " + placeName(partner) + ". How is your day going?",
         "Hello from " + placeName(partner) + ". What shall we talk about?"
       ], partner.id + "en");
+    }
+
+    function taughtPhrase(table, raw) {
+      var q = raw.toLowerCase();
+      var best = null;
+      var bestLen = 0;
+      for (var i = 0; i < table.length; i++) {
+        var phrase = table[i].phrase.toLowerCase().replace(/[?.!]/g, "").trim();
+        if (phrase.length > 2 && q.indexOf(phrase) !== -1 && phrase.length > bestLen) {
+          best = table[i];
+          bestLen = phrase.length;
+        }
+      }
+      return best;
+    }
+
+    function learnerAsk(lang, salt) {
+      var word = pick(["good morning", "hello", "thank you", "how are you", "goodbye"], salt);
+      return pick([
+        "How do I say " + word + " in " + lang + "?",
+        "Can you teach me how to say " + word + "?",
+        "What is " + word + " in " + lang + "?"
+      ], salt + word);
+    }
+
+    function learnerReply(data, partner, norm, raw) {
+      var table = data.topic === "luganda" ? luganda : swahili;
+      var lang = data.topic === "luganda" ? "Luganda" : "Swahili";
+      var say = extractSay(raw.toLowerCase());
+      if (say) {
+        var asked = findPhrase(table, say);
+        if (asked) return "I am learning that too. Is it \"" + spoken(asked.phrase) + "\"?";
+        return "I do not know that one yet. Could you teach me how to say " + say + "?";
+      }
+      var taught = taughtPhrase(table, raw);
+      if (taught) {
+        var line = spoken(taught.phrase);
+        return pick([
+          "Thank you! So I say \"" + line + "\"",
+          "Let me try. \"" + line + "\" Did I get it right?",
+          "I'll remember that. \"" + line + "\""
+        ], raw + partner.id);
+      }
+      if (/\bhow are you\b|\bhow's your day\b|\bhow is your day\b/.test(norm)) {
+        return pick([
+          "I'm doing great, thank you! " + learnerAsk(lang, norm),
+          "I'm well, thank you. " + learnerAsk(lang, partner.id)
+        ], norm + partner.id);
+      }
+      if (/what country|where are you|which country|chatting from|where do you live|where you from|you chatting/.test(norm)) {
+        return "I'm from " + placeName(partner) + ". " + learnerAsk(lang, partner.country);
+      }
+      if (/your name|who are you/.test(norm)) {
+        return "I'm " + partner.name + ", from " + placeName(partner) + ". " + learnerAsk(lang, partner.id);
+      }
+      if (/^(hi|hello|hey|habari|good morning|good afternoon|good evening)\b/.test(norm) || /\b(of course|sure|yes|i can|happy to|teach you)\b/.test(norm)) {
+        return pick([
+          "Thank you! " + learnerAsk(lang, norm + partner.id),
+          "That is kind of you. " + learnerAsk(lang, partner.id + "b"),
+          "Wonderful. " + learnerAsk(lang, raw)
+        ], norm + partner.id);
+      }
+      if (/\bthank/.test(norm)) {
+        return "You are welcome. " + learnerAsk(lang, norm);
+      }
+      if (/\bbye\b|\bgoodbye\b/.test(norm)) {
+        return pick([
+          "Goodbye for now. It was nice learning with you.",
+          "Take care. Thank you for helping me practise.",
+          "Bye for now. I hope we can keep learning together."
+        ], norm);
+      }
+      return pick([
+        "Thanks for that. " + learnerAsk(lang, raw),
+        "I am still learning " + lang + ". " + learnerAsk(lang, partner.id + raw),
+        "That helps me. " + learnerAsk(lang, norm + lang)
+      ], raw + partner.id);
     }
 
     function socialReply(partner, norm, raw) {
@@ -1313,8 +1381,8 @@
       if (/\bbye\b|\bgoodbye\b/.test(norm)) {
         return pick([
           "Goodbye for now. It was nice chatting.",
-          "Take care. I enjoyed this preview.",
-          "Bye for now. You can continue with a free account when you are ready."
+          "Take care. I enjoyed talking with you.",
+          "Bye for now. I hope we can chat again."
         ], norm);
       }
       if (norm) {
@@ -1331,75 +1399,8 @@
 
     function compose(data, raw) {
       var partner = partnerById(data.partnerId);
-      var lower = raw.toLowerCase();
-      var norm = lower.replace(/[!?.,]/g, " ").replace(/\s+/g, " ").trim();
-      var say = extractSay(lower);
-      var teachAsk = /\b(teach|learn|help me|show me|practice|practise)\b/.test(norm);
-
-      if (say && /luganda/.test(norm)) return teach(luganda, say, "Luganda", partner.id);
-      if (say && /swahili/.test(norm)) return teach(swahili, say, "Swahili", partner.id);
-      if (say && data.topic === "luganda") return teach(luganda, say, "Luganda", partner.id);
-      if (say && data.topic === "swahili") return teach(swahili, say, "Swahili", partner.id);
-      if (say) return teach(data.topic === "luganda" ? luganda : swahili, say, data.topic === "luganda" ? "Luganda" : "Swahili", partner.id);
-
-      if (/luganda/.test(norm) && (teachAsk || /^(hi|hello|hey)\b/.test(norm))) {
-        return pick([
-          "Yes! I can help you learn.",
-          "Of course. Ask me how to say a greeting.",
-          "Yes. Which Luganda phrase would you like?"
-        ], norm + partner.id);
-      }
-      if (/swahili/.test(norm) && (teachAsk || /^(hi|hello|hey|habari)\b/.test(norm))) {
-        return pick([
-          "Of course! How are you doing?",
-          "Yes, let's practise. What would you like to say?",
-          "I can help with that. Ask me how to say something simple."
-        ], norm + partner.id);
-      }
-
-      if (data.topic === "swahili") {
-        var swHit = findPhrase(swahili, norm);
-        if (swHit && norm.split(" ").length <= 5) return "You say \"" + spoken(swHit.phrase) + "\"";
-        if (/^(hi|hello|hey|habari)\b/.test(norm)) {
-          return pick([
-            "Of course! How are you doing?",
-            "Habari! What phrase would you like?",
-            "Hello. We can start with good morning if you like."
-          ], norm + partner.id);
-        }
-      }
-      if (data.topic === "luganda") {
-        var lgHit = findPhrase(luganda, norm);
-        if (lgHit && norm.split(" ").length <= 5) return "You say \"" + spoken(lgHit.phrase) + "\"";
-        if (/^(hi|hello|hey)\b/.test(norm)) {
-          return pick([
-            "Yes! I can help you learn.",
-            "Hello. Ask me how to say hello, thank you, or good morning.",
-            "Hi. A friendly Luganda hello is \"Oli otya?\""
-          ], norm + partner.id);
-        }
-      }
-
-      if (data.topic === "english" || /\bhow are you\b|what country|where are you|your name|football|music|food|weather|travel|study/.test(norm)) {
-        var social = socialReply(partner, norm, raw);
-        if (social && data.topic === "english") return social;
-        if (social && /\bhow are you\b|what country|where are you|your name|football|music|food|weather|travel|study|thank|bye|goodbye|^(hi|hello|hey)\b/.test(norm)) return social;
-      }
-
-      if (data.topic === "swahili") {
-        return pick([
-          "Tell me the English words and I will teach you the Swahili.",
-          "We can keep going. Try asking, how do I say thank you?",
-          "I am here for Swahili practice. What would you like to say?"
-        ], norm + partner.id);
-      }
-      if (data.topic === "luganda") {
-        return pick([
-          "Ask me, how do I say it, and I will give you the Luganda.",
-          "Let's try a short Luganda phrase next. What do you want to say?",
-          "I can teach hello, thank you, or good morning in Luganda."
-        ], norm + partner.id);
-      }
+      var norm = raw.toLowerCase().replace(/[!?.,]/g, " ").replace(/\s+/g, " ").trim();
+      if (data.topic === "swahili" || data.topic === "luganda") return learnerReply(data, partner, norm, raw);
       return socialReply(partner, norm, raw);
     }
 
