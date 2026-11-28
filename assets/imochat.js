@@ -565,6 +565,7 @@
   initAge();
   paintDashboard();
   initLiveChat();
+  initPreviewChat();
 
   function initLiveChat() {
     var root = document.querySelector("[data-live-chat]");
@@ -921,6 +922,585 @@
 
     paint();
     window.setInterval(play, 3000);
+  }
+
+  function initPreviewChat() {
+    var trigger = document.querySelector("[data-preview-chat]");
+    if (!trigger) return;
+
+    var STORE = "imochat.previewChat";
+    var FREE = 3;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var partners = [
+      { id: "sarah", name: "Sarah", gender: "female", country: "KE", countryName: "Kenya", photo: "sarah" },
+      { id: "amani", name: "Amani", gender: "male", country: "KE", countryName: "Kenya" },
+      { id: "grace", name: "Grace", gender: "female", country: "UG", countryName: "Uganda", photo: "grace" },
+      { id: "kato", name: "Kato", gender: "male", country: "UG", countryName: "Uganda" },
+      { id: "neema", name: "Neema", gender: "female", country: "TZ", countryName: "Tanzania" },
+      { id: "jabari", name: "Jabari", gender: "male", country: "TZ", countryName: "Tanzania" },
+      { id: "chioma", name: "Chioma", gender: "female", country: "NG", countryName: "Nigeria" },
+      { id: "tunde", name: "Tunde", gender: "male", country: "NG", countryName: "Nigeria" },
+      { id: "ama", name: "Ama", gender: "female", country: "GH", countryName: "Ghana" },
+      { id: "kwame", name: "Kwame", gender: "male", country: "GH", countryName: "Ghana" },
+      { id: "mbala", name: "Mbala", gender: "female", country: "CM", countryName: "Cameroon" },
+      { id: "etienne", name: "Etienne", gender: "male", country: "CM", countryName: "Cameroon" },
+      { id: "mwansa", name: "Mwansa", gender: "female", country: "ZM", countryName: "Zambia" },
+      { id: "chanda", name: "Chanda", gender: "male", country: "ZM", countryName: "Zambia" },
+      { id: "james", name: "James", gender: "male", country: "GB", countryName: "United Kingdom", photo: "james" },
+      { id: "olivia", name: "Olivia", gender: "female", country: "GB", countryName: "United Kingdom" },
+      { id: "emily", name: "Emily", gender: "female", country: "US", countryName: "United States", photo: "emily" },
+      { id: "noah", name: "Noah", gender: "male", country: "US", countryName: "United States" },
+      { id: "daniel", name: "Daniel", gender: "male", country: "CA", countryName: "Canada", photo: "daniel" },
+      { id: "sophia", name: "Sophia", gender: "female", country: "AU", countryName: "Australia", photo: "sophia" },
+      { id: "anna", name: "Anna", gender: "female", country: "DE", countryName: "Germany", photo: "anna" },
+      { id: "david", name: "David", gender: "male", country: "FR", countryName: "France", photo: "david" },
+      { id: "emma", name: "Emma", gender: "female", country: "NL", countryName: "Netherlands", photo: "emma" },
+      { id: "lars", name: "Lars", gender: "male", country: "SE", countryName: "Sweden", photo: "lars" },
+      { id: "ingrid", name: "Ingrid", gender: "female", country: "NO", countryName: "Norway", photo: "ingrid" },
+      { id: "marco", name: "Marco", gender: "male", country: "IT", countryName: "Italy", photo: "marco" }
+    ];
+    var hues = { KE: "#246247", UG: "#8a5a12", TZ: "#1d4f91", NG: "#1c2433", GH: "#b5523a", CM: "#62456f", ZM: "#246247", GB: "#1d4f91", US: "#1c2433", CA: "#b5523a", AU: "#246247", DE: "#62456f", FR: "#1d4f91", NL: "#b7791f", SE: "#1c2433", NO: "#1d4f91", IT: "#b5523a" };
+    var swahili = [
+      { keys: ["good morning"], phrase: "Habari za asubuhi", note: "Use it in the morning." },
+      { keys: ["good afternoon"], phrase: "Habari za mchana", note: "That fits the afternoon." },
+      { keys: ["good evening"], phrase: "Habari za jioni", note: "That is the evening greeting." },
+      { keys: ["good night"], phrase: "Usiku mwema", note: "Say it when the day is ending." },
+      { keys: ["how are you", "how are you doing", "how do you do"], phrase: "Habari yako?", note: "A simple reply is Nzuri." },
+      { keys: ["thank you very much"], phrase: "Asante sana", note: "Sana means very much." },
+      { keys: ["thank you", "thanks"], phrase: "Asante", note: "Asante means thank you." },
+      { keys: ["goodbye", "bye", "see you"], phrase: "Kwaheri", note: "Tutaonana means see you later." },
+      { keys: ["excuse me", "sorry"], phrase: "Samahani", note: "It works for excuse me or sorry." },
+      { keys: ["please"], phrase: "Tafadhali", note: "Put it before a request." },
+      { keys: ["my name", "your name"], phrase: "Jina langu ni…", note: "Ask someone with Jina lako nani?" },
+      { keys: ["where are you from", "what country"], phrase: "Unatoka wapi?", note: "That asks where someone is from." },
+      { keys: ["friend"], phrase: "Rafiki", note: "Rafiki yangu means my friend." },
+      { keys: ["welcome"], phrase: "Karibu", note: "Karibu also means you are welcome." },
+      { keys: ["water"], phrase: "Maji", note: "Maji is water." },
+      { keys: ["food"], phrase: "Chakula", note: "Chakula is food." },
+      { keys: ["teacher"], phrase: "Mwalimu", note: "Mwalimu means teacher." },
+      { keys: ["student"], phrase: "Mwanafunzi", note: "Mwanafunzi means student." },
+      { keys: ["today"], phrase: "Leo", note: "Leo means today." },
+      { keys: ["tomorrow"], phrase: "Kesho", note: "Kesho means tomorrow." },
+      { keys: ["yes"], phrase: "Ndiyo", note: "Ndiyo means yes." },
+      { keys: ["no"], phrase: "Hapana", note: "Hapana means no." },
+      { keys: ["fine", "i am fine", "i'm fine"], phrase: "Nzuri", note: "Nzuri means fine or good." },
+      { keys: ["hello", "hi", "hey"], phrase: "Habari", note: "Habari is a friendly hello." }
+    ];
+    var luganda = [
+      { keys: ["good morning"], phrase: "Wasuze otya?", note: "It is the usual morning greeting." },
+      { keys: ["good afternoon", "good evening"], phrase: "Osiibye otya?", note: "People use it later in the day." },
+      { keys: ["good night"], phrase: "Sula bulungi", note: "Say it when someone is going to sleep." },
+      { keys: ["thank you very much"], phrase: "Weebale nnyo", note: "Nnyo strengthens the thanks." },
+      { keys: ["thank you", "thanks"], phrase: "Weebale", note: "Weebale means thank you." },
+      { keys: ["goodbye", "bye"], phrase: "Weraba", note: "Weraba is goodbye." },
+      { keys: ["see you"], phrase: "Tunaalabagana", note: "It means we shall see each other." },
+      { keys: ["please"], phrase: "Mwattu", note: "Use it with a polite request." },
+      { keys: ["sorry", "excuse me"], phrase: "Nsonyiwa", note: "Nsonyiwa is a way to say sorry." },
+      { keys: ["friend"], phrase: "Mukwano", note: "Mukwano means friend." },
+      { keys: ["water"], phrase: "Amazzi", note: "Amazzi means water." },
+      { keys: ["food"], phrase: "Emmere", note: "Emmere means food." },
+      { keys: ["yes"], phrase: "Yee", note: "Yee means yes." },
+      { keys: ["no"], phrase: "Nedda", note: "Nedda means no." },
+      { keys: ["my name"], phrase: "Erinnya lyange nze…", note: "Then say your name." },
+      { keys: ["your name"], phrase: "Erinnya lyo ggwe ani?", note: "That asks for someone's name." },
+      { keys: ["welcome"], phrase: "Tukusanyukidde", note: "It welcomes someone warmly." },
+      { keys: ["fine", "i am fine", "i'm fine"], phrase: "Bulungi", note: "Bulungi means fine or well." },
+      { keys: ["how are you", "how are you doing", "hello", "hi", "hey"], phrase: "Oli otya?", note: "It is both hello and how are you." }
+    ];
+
+    var session = null;
+    var typing = false;
+    var replyQueue = [];
+    var waitTimer = 0;
+    var lastFocus = null;
+
+    var overlay = document.createElement("div");
+    overlay.className = "pc-overlay";
+    overlay.hidden = true;
+    var sheet = document.createElement("section");
+    sheet.className = "pc-sheet";
+    sheet.setAttribute("role", "dialog");
+    sheet.setAttribute("aria-modal", "true");
+    sheet.setAttribute("aria-labelledby", "pc-title");
+    sheet.innerHTML = '<header class="pc-head"><button class="pc-close" type="button">Close</button><div class="pc-who"><div class="pc-avatar-slot"></div><div><h2 id="pc-title"></h2><p class="pc-meta"></p></div></div><p class="pc-count" aria-live="polite"></p></header><p class="pc-note">Interactive preview. This partner is a sample character, not someone who is online.</p><div class="pc-log" role="log" aria-live="polite"></div><form class="pc-form"><label class="pc-sr" for="pc-input">Message</label><input id="pc-input" maxlength="400" autocomplete="off" placeholder="Type a message"><button class="pc-send" type="submit">Send</button></form>';
+    overlay.appendChild(sheet);
+
+    var gate = document.createElement("div");
+    gate.className = "pc-gate";
+    gate.hidden = true;
+    var gateCard = document.createElement("div");
+    gateCard.className = "pc-gate-card";
+    gateCard.setAttribute("role", "dialog");
+    gateCard.setAttribute("aria-modal", "true");
+    gateCard.setAttribute("aria-labelledby", "pc-gate-title");
+    gateCard.innerHTML = '<h2 id="pc-gate-title">Enjoying your conversation? 😊</h2><p class="pc-gate-lead">You\'ve used your 3 free messages!</p><p>Create your free account to continue chatting with people worldwide, connect with new friends and access earning opportunities.</p><ul class="list"><li>Continue unlimited chatting according to your account access.</li><li>Connect with people around the world.</li><li>Teach foreigners Swahili or Luganda.</li><li>Access available earning opportunities.</li><li>Create an account to access eligible payment and withdrawal features.</li></ul><div class="pc-gate-actions"><a class="btn btn-gold" href="' + REG + '" target="_blank" rel="noopener noreferrer">Create an Account</a><button class="btn btn-ghost" type="button" data-pc-later>Maybe Later</button></div>';
+    gate.appendChild(gateCard);
+    document.body.appendChild(overlay);
+    document.body.appendChild(gate);
+
+    var titleEl = sheet.querySelector("#pc-title");
+    var metaEl = sheet.querySelector(".pc-meta");
+    var countEl = sheet.querySelector(".pc-count");
+    var avatarSlot = sheet.querySelector(".pc-avatar-slot");
+    var logEl = sheet.querySelector(".pc-log");
+    var form = sheet.querySelector(".pc-form");
+    var input = sheet.querySelector("#pc-input");
+    var laterBtn = gate.querySelector("[data-pc-later]");
+    var accountLink = gate.querySelector("a");
+
+    function partnerById(id) {
+      for (var i = 0; i < partners.length; i++) {
+        if (partners[i].id === id) return partners[i];
+      }
+      return null;
+    }
+
+    function pick(list, salt) {
+      var n = 0;
+      var s = String(salt || "");
+      for (var i = 0; i < s.length; i++) n = (n + s.charCodeAt(i) * (i + 3)) % 997;
+      return list[n % list.length];
+    }
+
+    function save(data) {
+      write(STORE, data);
+    }
+
+    function loadOrCreate() {
+      var saved = read(STORE, null);
+      var partner = saved && partnerById(saved.partnerId);
+      var topicOk = saved && (saved.topic === "swahili" || saved.topic === "luganda" || saved.topic === "english");
+      if (partner && topicOk && Array.isArray(saved.messages)) {
+        saved.sent = Math.max(0, Math.min(FREE, Number(saved.sent) || 0));
+        return saved;
+      }
+      var kept = saved && isFinite(Number(saved.sent)) ? Math.max(0, Math.min(FREE, Number(saved.sent))) : 0;
+      var topics = ["swahili", "luganda", "english"];
+      var created = {
+        sent: kept,
+        partnerId: partners[Math.floor(Math.random() * partners.length)].id,
+        topic: topics[Math.floor(Math.random() * topics.length)],
+        messages: []
+      };
+      save(created);
+      return created;
+    }
+
+    function counterText(sent) {
+      var left = FREE - sent;
+      if (left === 1) return "1 free message remaining";
+      return left + " free messages remaining";
+    }
+
+    function letterNode(partner) {
+      var span = document.createElement("span");
+      span.className = "lgc-letter";
+      span.style.background = hues[partner.country] || "#1c2433";
+      span.textContent = partner.name.charAt(0);
+      return span;
+    }
+
+    function paintPartner(partner) {
+      titleEl.textContent = partner.name;
+      metaEl.innerHTML = "";
+      var flag = document.createElement("img");
+      flag.className = "lgc-flag";
+      flag.alt = "";
+      flag.width = 18;
+      flag.height = 12;
+      flag.src = "/assets/flags/" + partner.country.toLowerCase() + ".svg";
+      metaEl.appendChild(flag);
+      var place = document.createElement("span");
+      place.textContent = partner.countryName;
+      metaEl.appendChild(place);
+      var pill = document.createElement("span");
+      pill.className = "lgc-demo-pill";
+      pill.textContent = "PREVIEW";
+      metaEl.appendChild(pill);
+      avatarSlot.innerHTML = "";
+      var box = document.createElement("div");
+      box.className = "lgc-avatar lgc-avatar-sm";
+      if (partner.photo) {
+        var img = document.createElement("img");
+        img.alt = "";
+        img.width = 42;
+        img.height = 42;
+        img.src = "/assets/promo/" + partner.photo + ".jpg";
+        img.addEventListener("error", function () {
+          img.remove();
+          box.appendChild(letterNode(partner));
+        });
+        box.appendChild(img);
+      } else {
+        box.appendChild(letterNode(partner));
+      }
+      avatarSlot.appendChild(box);
+      countEl.textContent = counterText(session.sent);
+    }
+
+    function render() {
+      var partner = partnerById(session.partnerId);
+      paintPartner(partner);
+      logEl.innerHTML = "";
+      session.messages.forEach(function (item) {
+        var row = document.createElement("div");
+        row.className = "pc-row " + (item.from === "you" ? "is-you" : "is-them");
+        if (item.from !== "you") {
+          var who = document.createElement("span");
+          who.className = "pc-name";
+          who.textContent = partner.name;
+          row.appendChild(who);
+        }
+        var bubble = document.createElement("p");
+        bubble.className = "pc-bubble " + (item.from === "you" ? "you" : "them");
+        bubble.textContent = item.text;
+        row.appendChild(bubble);
+        logEl.appendChild(row);
+      });
+      if (typing) {
+        var wait = document.createElement("div");
+        wait.className = "pc-row is-them";
+        var bubble = document.createElement("p");
+        bubble.className = "pc-bubble them lgc-typing";
+        bubble.innerHTML = "<i></i><i></i><i></i><span>typing...</span>";
+        wait.appendChild(bubble);
+        logEl.appendChild(wait);
+      }
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function findPhrase(table, say) {
+      var q = " " + String(say || "").toLowerCase().replace(/[^a-z'\s]/g, " ").replace(/\s+/g, " ").trim() + " ";
+      var best = null;
+      var bestLen = 0;
+      for (var i = 0; i < table.length; i++) {
+        for (var k = 0; k < table[i].keys.length; k++) {
+          var key = table[i].keys[k];
+          if (q.indexOf(" " + key + " ") !== -1 && key.length > bestLen) {
+            best = table[i];
+            bestLen = key.length;
+          }
+        }
+      }
+      return best;
+    }
+
+    function spoken(phrase) {
+      return /[.?!]$/.test(phrase) ? phrase : phrase + ".";
+    }
+
+    function placeName(partner) {
+      var name = partner.countryName;
+      if (name === "Netherlands" || name.indexOf("United ") === 0) return "the " + name;
+      return name;
+    }
+
+    function extractSay(lower) {
+      var match = lower.match(/(?:how (?:do|can) (?:i|you|we) say|how to say|what(?:'s| is) (?:the )?(?:word|swahili|luganda) for)\s+["']?(.+?)["']?\s*$/);
+      if (!match) return "";
+      return match[1].replace(/[?.!"']+$/g, "").replace(/^(a |the |please )/, "").trim();
+    }
+
+    function teach(table, say, langName, salt) {
+      var hit = findPhrase(table, say);
+      if (!hit) {
+        return "I want to keep this accurate, so I will not guess a " + langName + " line for \"" + say + ".\" Ask me for hello, good morning, thank you, or how are you.";
+      }
+      var line = spoken(hit.phrase);
+      return pick([
+        "You say \"" + line + "\"",
+        "In " + langName + " you say \"" + line + "\" " + hit.note,
+        "\"" + line + "\" " + hit.note
+      ], salt + hit.phrase);
+    }
+
+    function opening(data, partner) {
+      if (data.topic === "swahili") {
+        return pick([
+          "Hello! I can help you practise Swahili. What would you like to say?",
+          "Habari! I am " + partner.name + " from " + placeName(partner) + ". Ask me for a Swahili phrase.",
+          "Hi. Want to learn a useful Swahili greeting?"
+        ], partner.id + "sw");
+      }
+      if (data.topic === "luganda") {
+        return pick([
+          "Hi! I can help you learn some Luganda. What shall we try first?",
+          "Yes, I can teach you Luganda. Ask me how to say a greeting.",
+          "Hello, I am " + partner.name + ". A simple Luganda hello is \"Oli otya?\""
+        ], partner.id + "lg");
+      }
+      return pick([
+        "Hello! How are you today?",
+        "Hi, I am " + partner.name + " from " + placeName(partner) + ". How is your day going?",
+        "Hello from " + placeName(partner) + ". What shall we talk about?"
+      ], partner.id + "en");
+    }
+
+    function socialReply(partner, norm, raw) {
+      if (/\bhow are you\b|\bhow're you\b|\bhow r you\b|\bhow's your day\b|\bhow is your day\b/.test(norm)) {
+        return pick([
+          "I'm doing great, thank you! How about you?",
+          "I'm well, thank you. How about you?",
+          "Doing well today. How are you?"
+        ], norm + partner.id);
+      }
+      if (/what country|where are you|which country|chatting from|where do you live|where you from|you chatting/.test(norm)) {
+        return pick([
+          "I'm from " + placeName(partner) + ".",
+          "I'm chatting from " + placeName(partner) + ".",
+          "I am in " + placeName(partner) + ". Where are you chatting from?"
+        ], partner.country + norm);
+      }
+      if (/your name|who are you/.test(norm)) {
+        return "I'm " + partner.name + ", from " + placeName(partner) + ".";
+      }
+      if (/^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(norm)) {
+        return pick([
+          "Hello! How are you today?",
+          "Hi! It is nice to meet you. How are you?",
+          "Hello from " + placeName(partner) + ". How is your day?"
+        ], partner.id + norm);
+      }
+      if (/\bfootball\b|\bsoccer\b|\bmatch\b/.test(norm)) {
+        return pick([
+          "I enjoy football too. Which team do you follow?",
+          "Football is a fun topic. I watch it from " + placeName(partner) + ".",
+          "I like a good match. Do you play, or mostly watch?"
+        ], norm);
+      }
+      if (/\bmusic\b|\bsong\b/.test(norm)) {
+        return pick([
+          "Music is a good way to learn words. What do you like listening to?",
+          "I listen to a mix of local and international songs. What about you?",
+          "A song can teach a phrase quickly. Do you have a favourite?"
+        ], norm);
+      }
+      if (/\bfood\b|\beat\b|\bcook\b|\bmeal\b/.test(norm)) {
+        return pick([
+          "Food is my favourite topic. What do you like to eat?",
+          "In " + placeName(partner) + ", meals are a big part of the day. What do you cook?",
+          "I am always happy to talk about food. What did you eat today?"
+        ], norm);
+      }
+      if (/\bstudy\b|\bschool\b|\blearn\b|\bpractis|\bpractice\b/.test(norm)) {
+        return pick([
+          "Studying a little every day helps. What are you practising?",
+          "I like short practice sessions. What are you learning at the moment?",
+          "We can keep this useful. What do you want to practise?"
+        ], norm);
+      }
+      if (/\bweather\b|\brain\b|\bsunny\b|\bsun\b/.test(norm)) {
+        return pick([
+          "The weather changes the mood of the day. What is it like where you are?",
+          "I hope the weather is kind where you are. It varies in " + placeName(partner) + ".",
+          "Is it warm where you are today?"
+        ], norm);
+      }
+      if (/\btravel\b|\bvisit\b|\btrip\b/.test(norm)) {
+        return pick([
+          "Travel makes these chats more fun. Where would you like to go?",
+          "I would like to hear about a place you recommend.",
+          "From " + placeName(partner) + ", I enjoy hearing about other places. Where are you?"
+        ], norm);
+      }
+      if (/\bthank/.test(norm)) {
+        return pick([
+          "You are welcome.",
+          "Happy to help. What else would you like to ask?",
+          "Anytime. Shall we keep going?"
+        ], norm);
+      }
+      if (/\bbye\b|\bgoodbye\b/.test(norm)) {
+        return pick([
+          "Goodbye for now. It was nice chatting.",
+          "Take care. I enjoyed this preview.",
+          "Bye for now. You can continue with a free account when you are ready."
+        ], norm);
+      }
+      if (norm) {
+        var bit = raw.replace(/\s+/g, " ").trim();
+        if (bit.length > 90) bit = bit.slice(0, 87) + "...";
+        return pick([
+          "I like that. You said \"" + bit + ".\" Tell me a little more.",
+          "Thanks for sharing. I am " + partner.name + " in " + placeName(partner) + ". What else is new with you?",
+          "That makes sense. How does that feel where you are today?"
+        ], bit);
+      }
+      return null;
+    }
+
+    function compose(data, raw) {
+      var partner = partnerById(data.partnerId);
+      var lower = raw.toLowerCase();
+      var norm = lower.replace(/[!?.,]/g, " ").replace(/\s+/g, " ").trim();
+      var say = extractSay(lower);
+      var teachAsk = /\b(teach|learn|help me|show me|practice|practise)\b/.test(norm);
+
+      if (say && /luganda/.test(norm)) return teach(luganda, say, "Luganda", partner.id);
+      if (say && /swahili/.test(norm)) return teach(swahili, say, "Swahili", partner.id);
+      if (say && data.topic === "luganda") return teach(luganda, say, "Luganda", partner.id);
+      if (say && data.topic === "swahili") return teach(swahili, say, "Swahili", partner.id);
+      if (say) return teach(data.topic === "luganda" ? luganda : swahili, say, data.topic === "luganda" ? "Luganda" : "Swahili", partner.id);
+
+      if (/luganda/.test(norm) && (teachAsk || /^(hi|hello|hey)\b/.test(norm))) {
+        return pick([
+          "Yes! I can help you learn.",
+          "Of course. Ask me how to say a greeting.",
+          "Yes. Which Luganda phrase would you like?"
+        ], norm + partner.id);
+      }
+      if (/swahili/.test(norm) && (teachAsk || /^(hi|hello|hey|habari)\b/.test(norm))) {
+        return pick([
+          "Of course! How are you doing?",
+          "Yes, let's practise. What would you like to say?",
+          "I can help with that. Ask me how to say something simple."
+        ], norm + partner.id);
+      }
+
+      if (data.topic === "swahili") {
+        var swHit = findPhrase(swahili, norm);
+        if (swHit && norm.split(" ").length <= 5) return "You say \"" + spoken(swHit.phrase) + "\"";
+        if (/^(hi|hello|hey|habari)\b/.test(norm)) {
+          return pick([
+            "Of course! How are you doing?",
+            "Habari! What phrase would you like?",
+            "Hello. We can start with good morning if you like."
+          ], norm + partner.id);
+        }
+      }
+      if (data.topic === "luganda") {
+        var lgHit = findPhrase(luganda, norm);
+        if (lgHit && norm.split(" ").length <= 5) return "You say \"" + spoken(lgHit.phrase) + "\"";
+        if (/^(hi|hello|hey)\b/.test(norm)) {
+          return pick([
+            "Yes! I can help you learn.",
+            "Hello. Ask me how to say hello, thank you, or good morning.",
+            "Hi. A friendly Luganda hello is \"Oli otya?\""
+          ], norm + partner.id);
+        }
+      }
+
+      if (data.topic === "english" || /\bhow are you\b|what country|where are you|your name|football|music|food|weather|travel|study/.test(norm)) {
+        var social = socialReply(partner, norm, raw);
+        if (social && data.topic === "english") return social;
+        if (social && /\bhow are you\b|what country|where are you|your name|football|music|food|weather|travel|study|thank|bye|goodbye|^(hi|hello|hey)\b/.test(norm)) return social;
+      }
+
+      if (data.topic === "swahili") {
+        return pick([
+          "Tell me the English words and I will teach you the Swahili.",
+          "We can keep going. Try asking, how do I say thank you?",
+          "I am here for Swahili practice. What would you like to say?"
+        ], norm + partner.id);
+      }
+      if (data.topic === "luganda") {
+        return pick([
+          "Ask me, how do I say it, and I will give you the Luganda.",
+          "Let's try a short Luganda phrase next. What do you want to say?",
+          "I can teach hello, thank you, or good morning in Luganda."
+        ], norm + partner.id);
+      }
+      return socialReply(partner, norm, raw);
+    }
+
+    function delayFor(text) {
+      if (reduce) return 0;
+      return Math.max(700, Math.min(1400, 600 + String(text || "").length * 12));
+    }
+
+    function showGate() {
+      gate.hidden = false;
+      accountLink.focus();
+    }
+
+    function hideGate() {
+      gate.hidden = true;
+      input.focus();
+    }
+
+    function enqueuePartner(text, raw) {
+      replyQueue.push({ text: text, raw: raw });
+      drain();
+    }
+
+    function drain() {
+      if (waitTimer || !replyQueue.length) return;
+      var job = replyQueue.shift();
+      typing = true;
+      render();
+      waitTimer = window.setTimeout(function () {
+        waitTimer = 0;
+        typing = false;
+        session.messages.push({ from: "partner", text: job.text || compose(session, job.raw) });
+        save(session);
+        render();
+        drain();
+      }, job.text ? (reduce ? 0 : 800) : delayFor(job.raw));
+    }
+
+    function queueReply(raw) {
+      enqueuePartner("", raw);
+    }
+
+    function greet() {
+      if (session.messages.length || replyQueue.length || waitTimer) return;
+      enqueuePartner(opening(session, partnerById(session.partnerId)), "");
+    }
+
+    function openChat() {
+      session = loadOrCreate();
+      overlay.hidden = false;
+      document.body.classList.add("pc-open");
+      render();
+      greet();
+      input.focus();
+    }
+
+    function closeChat() {
+      hideGate();
+      overlay.hidden = true;
+      document.body.classList.remove("pc-open");
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    function beginPreview(event) {
+      if (event) event.preventDefault();
+      lastFocus = trigger;
+      openChat();
+    }
+    trigger.addEventListener("click", beginPreview);
+
+    sheet.querySelector(".pc-close").addEventListener("click", closeChat);
+    overlay.addEventListener("click", function (event) {
+      if (event.target === overlay) closeChat();
+    });
+    laterBtn.addEventListener("click", hideGate);
+    gate.addEventListener("click", function (event) {
+      if (event.target === gate) hideGate();
+    });
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var text = input.value.replace(/\s+/g, " ").trim();
+      if (!text) return;
+      if (session.sent >= FREE) {
+        showGate();
+        return;
+      }
+      session.sent += 1;
+      session.messages.push({ from: "you", text: text.slice(0, 400) });
+      save(session);
+      input.value = "";
+      render();
+      queueReply(text);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      if (!gate.hidden) {
+        hideGate();
+        return;
+      }
+      if (!overlay.hidden) closeChat();
+    });
   }
 
 })();
